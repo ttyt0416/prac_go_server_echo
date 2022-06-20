@@ -5,6 +5,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/ttyt0416/learngo/configs"
 	"github.com/ttyt0416/learngo/user"
 )
 
@@ -17,13 +18,14 @@ func main() {
 		AllowOrigins: []string{"http://localhost:3000"},
 		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 	}))
+	configs.ConnectDB()
 
 	//user methods
 	e.GET("/users", user.GetAllUsers)
-	e.GET("/users/:id", user.GetUser)
-	e.PUT("/users/:id", user.UpdateUser)
+	e.GET("/users/:userId", user.GetUser)
+	e.PUT("/users/:userId", user.UpdateUser)
 	e.POST("/users", user.CreateUser)
-	e.DELETE("/users/:id", user.DeleteUser)
+	e.DELETE("/users/:userId", user.DeleteUser)
 
 	//auth methods
 
