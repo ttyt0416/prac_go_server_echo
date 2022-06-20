@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -161,20 +162,28 @@ func GetAllUsers(c echo.Context) error {
 }
 
 func Login(c echo.Context) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+  defer cancel()
+
 	user := new(models.User)
 	c.Bind(user)
 	username := user.Name
 	password := user.Password
 
-	// Throws unauthorized error
-	if username != "jon" || password != "shhh!" {
-		// return echo.ErrUnauthorized
-		return c.JSON(http.StatusUnauthorized, user)
+	err := userCollection.FindOne(ctx, bson.M{"name": username}).Decode(&user)
+
+    if err != nil {
+        return c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"data": err.Error()}})
+    }
+
+	if user.Password != password {
+		fmt.Println(user.Password)
+		return c.JSON(http.StatusUnauthorized, user.Password)
 	}
 
 	// Set custom claims
 	claims := &JwtCustomClaims{
-		"Jon Snow",
+		user.Name,
 		true,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 72).Unix(),
