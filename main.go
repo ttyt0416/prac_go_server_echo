@@ -5,7 +5,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/ttyt0416/learngo/auth"
 	"github.com/ttyt0416/learngo/user"
 )
 
@@ -29,19 +28,19 @@ func main() {
 	//auth methods
 
 	// Login route
-	e.POST("/login", auth.Login)
+	e.POST("/login", user.Login)
 	// Unauthenticated route
-	e.GET("/", auth.Accessible)
+	e.GET("/", user.Accessible)
 	// Restricted group
 	r := e.Group("/restricted")
 
 	// Configure middleware with the custom claims type
 	config := middleware.JWTConfig{
-		Claims:     &auth.JwtCustomClaims{},
+		Claims:     &user.JwtCustomClaims{},
 		SigningKey: []byte("secret"),
 	}
 	r.Use(middleware.JWTWithConfig(config))
-	r.GET("", auth.Restricted)
+	r.GET("", user.Restricted)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
