@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/ttyt0416/learngo/configs"
+	"github.com/ttyt0416/learngo/post"
 	"github.com/ttyt0416/learngo/user"
 )
 
@@ -26,11 +27,15 @@ func main() {
 	e.PUT("/users/:userId", user.UpdateUser)
 	e.POST("/users", user.CreateUser)
 	e.DELETE("/users/:userId", user.DeleteUser)
-
-	//auth methods
-
-	// Login route
 	e.POST("/login", user.Login)
+
+	//post methods
+	e.GET("/posts", post.GetAllPosts)
+	e.GET("/posts/:postId", post.GetPost)
+	e.PUT("/posts/:postId", post.UpdatePost)
+	e.POST("/posts", post.CreatePost)
+	e.DELETE("/posts/:postId", post.DeletePost)
+
 	// Unauthenticated route
 	e.GET("/", user.Accessible)
 	// Restricted group
