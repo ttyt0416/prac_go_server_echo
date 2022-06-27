@@ -7,4 +7,5 @@ type User struct {
 	Name      string             `json:"name,omitempty" validate:"required"`
 	Password  string             `json:"password,omitempty" validate:"required"`
 	CreatedAt primitive.DateTime `json:"createdAt,omitempty"`
+	UpdatedAt primitive.DateTime `json:"updatedAt,omitempty"`
 }

@@ -102,7 +102,7 @@ func UpdateUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &echo.Map{"data": validationErr.Error()}})
 	}
 
-	update := bson.M{"name": user.Name, "password": user.Password}
+	update := bson.M{"name": user.Name, "password": user.Password, "updatedAt": primitive.DateTime(time.Now().UTC().UnixNano() / 1e6),}
 
 	result, err := userCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
 
