@@ -98,7 +98,7 @@ func UpdateUser(c echo.Context) error {
 	}
 
 	//find user is exist or not
-	if err := userCollection.FindOne(ctx, bson.M{"name": user.Name}).Decode(&user); err == mongo.ErrNoDocuments {
+	if err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user); err == mongo.ErrNoDocuments {
 		return c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"data": mongo.ErrNoDocuments}})
 	}
 
