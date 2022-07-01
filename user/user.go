@@ -36,15 +36,14 @@ func CreateUser(c echo.Context) error {
 	var user models.User
 	defer cancel()
 
-	//check username is already exist or not
-	checkUserName := userCollection.FindOne(ctx, bson.M{"name": user.Name}).Decode(&user)
-	if checkUserName != nil {
-		return c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"data": "username already exist"}})
-	}
-
 	//validate the request body
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	// check username is already exist or not
+	if result := userCollection.FindOne(ctx, bson.M{"name": user.Name}).Decode(&user); result != mongo.ErrNoDocuments {
+		return c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"data": mongo.ErrNoDocuments}})
 	}
 
 	//use the validator library to validate required fields
@@ -57,6 +56,7 @@ func CreateUser(c echo.Context) error {
 		Name:      user.Name,
 		Password:  user.Password,
 		CreatedAt: primitive.DateTime(time.Now().UTC().UnixNano() / 1e6),
+		UpdatedAt: primitive.DateTime(time.Now().UTC().UnixNano() / 1e6),
 	}
 
 	result, err := userCollection.InsertOne(ctx, newUser)
@@ -97,8 +97,13 @@ func UpdateUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &echo.Map{"data": err.Error()}})
 	}
 
+	//find user is exist or not
+	if err := userCollection.FindOne(ctx, bson.M{"name": user.Name}).Decode(&user); err == mongo.ErrNoDocuments {
+		return c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &echo.Map{"data": mongo.ErrNoDocuments}})
+	}
+
 	//use the validator library to validate required fields
-	if validationErr := validate.Struct(&user); validationErr != nil {
+	if validationErr := validate.Struct(&user); validationErr == mongo.ErrNoDocuments {
 		return c.JSON(http.StatusBadRequest, responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &echo.Map{"data": validationErr.Error()}})
 	}
 
